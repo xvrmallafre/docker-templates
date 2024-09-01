@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Función para mostrar el uso del script
+show_usage() {
+    echo "Uso: $0 [comando_npm]"
+    echo "Ejemplo: $0 install"
+}
+
+# Verifica si se necesita mostrar la ayuda
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    show_usage
+    exit 0
+fi
+
+PHP_SERVICE="php-fpm"
+NODE_COMMAND="$@"
+
+# Ejecuta el comando de artisan en el servicio Docker seleccionado
+if [ -z "$NODE_COMMAND" ]; then
+    docker-compose exec $PHP_SERVICE bash -c "cd /var/www/exam-creator && npm"
+else
+    docker-compose exec $PHP_SERVICE bash -c "cd /var/www/exam-creator && npm $NODE_COMMAND"
+fi

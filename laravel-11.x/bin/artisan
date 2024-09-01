@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Función para mostrar el uso del script
+show_usage() {
+    echo "Uso: $0 [comando_artisan]"
+    echo "Ejemplo: $0 migrate"
+}
+
+# Verifica si se necesita mostrar la ayuda
+if [[ "$1" == "--help" || "$1" == "-h" ]]; then
+    show_usage
+    exit 0
+fi
+
+PHP_SERVICE="php-fpm"
+
+# Toma el comando de artisan si se proporciona
+ARTISAN_COMMAND="$1"
+shift
+
+# Ejecuta el comando de artisan en el servicio Docker seleccionado
+if [ -z "$ARTISAN_COMMAND" ]; then
+    docker-compose exec $PHP_SERVICE bash -c "cd /var/www/exam-creator && php artisan"
+else
+    docker-compose exec $PHP_SERVICE bash -c "cd /var/www/exam-creator && php artisan $ARTISAN_COMMAND"
+fi

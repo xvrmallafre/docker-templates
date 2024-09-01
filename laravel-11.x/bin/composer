@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Ejecuta el comando de composer en el contenedor Docker
+if [ $# -eq 0 ]; then
+    docker-compose run --rm composer
+else
+    docker-compose run --rm composer "$@"
+fi

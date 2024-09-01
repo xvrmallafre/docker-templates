@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Obtener el directorio del proyecto (asumiendo que el script está en ./bin)
+PROJECT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+PHP_SERVICE="php-fpm"
+
+# Función para mostrar el uso del script
+usage() {
+    echo "Uso: $0 [on|off]"
+    exit 1
+}
+
+# Verificar si se proporcionó un argumento
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+# Activar o desactivar Xdebug según el argumento
+case "$1" in
+    on)
+        echo "Activando Xdebug..."
+        docker-compose exec -u root $PHP_SERVICE toggle-xdebug.sh on
+        ;;
+    off)
+        echo "Desactivando Xdebug..."
+        docker-compose exec -u root $PHP_SERVICE toggle-xdebug.sh off
+        ;;
+    *)
+        usage
+        ;;
+esac
+
+# Cambiar al directorio del proyecto
+cd "$PROJECT_DIR"
+
+# Verificar si el contenedor existe y está en ejecución
+if ! docker-compose ps | grep -q $PHP_SERVICE; then
+    echo "Error: El contenedor $PHP_SERVICE no existe o no está en ejecución."
+    exit 1
+fi
+
+if ! docker-compose ps | grep -q "nginx"; then
+    echo "Error: El contenedor nginx no existe o no está en ejecución."
+    exit 1
+fi
+
+# Reiniciar el contenedor para aplicar los cambios
+if docker-compose restart $PHP_SERVICE nginx; then
+    echo "Contenedores reiniciados correctamente."
+else
+    echo "Error al reiniciar los contenedores."
+    exit 1
+fi
