@@ -31,7 +31,7 @@ El propósito de este repositorio es ofrecer configuraciones listas para usar qu
 
 2. Navega al directorio del framework o tecnología que deseas utilizar y sigue las instrucciones específicas en su README.md.
 
-## Comandos Útiles
+### Comandos Útiles
   - Construir y levantar los contenedores Docker:
      ```sh
     docker-compose up --build
