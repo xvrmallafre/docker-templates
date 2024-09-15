@@ -1,15 +1,4 @@
 services:
-#  php-fpm-8.3:
-#    build:
-#      context: .
-#      dockerfile: DockerFiles/php/8.2/Dockerfile
-#    container_name: php-fpm-8.3
-#    user: "${UID}:${GID}"
-#    volumes:
-#      - ./code:/var/www/exam-creator
-#    networks:
-#      - exam_network
-
   php-fpm:
     build:
       context: .
@@ -19,13 +8,13 @@ services:
         GID: "${GID}"
     extra_hosts:
       - host.docker.internal:host-gateway
-    container_name: php-fpm-${PHP_VERSION}
+    container_name: ${PROJECT_NAME}-php-fpm-${PHP_VERSION}
     ports:
       - "55690:9003"
     volumes:
-      - ./code:/var/www/exam-creator
+      - ./code:/var/www/${PROJECT_NAME}
     networks:
-      - exam_network
+      - project_network
 
   nginx:
     image: nginx:latest
@@ -33,13 +22,17 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./config/nginx.conf:/etc/nginx/nginx.conf
-      - ./code:/var/www/exam-creator
+      - ./config/nginx-entrypoint.sh:/docker-entrypoint.d/40-envsubst-on-templates.sh:ro
+      - ./config/nginx.conf.template:/etc/nginx/nginx.conf.template:ro
+      - ./code:/var/www/${PROJECT_NAME}
       - nginx_cache:/var/cache/nginx
     depends_on:
       - php-fpm
+    environment:
+      - PHP_VERSION=${PHP_VERSION}
+      - PROJECT_NAME=${PROJECT_NAME}
     networks:
-      - exam_network
+      - project_network
 
   postgres:
     image: postgres:latest
@@ -54,7 +47,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: on-failure
     networks:
-      - exam_network
+      - project_network
 
   redis:
     image: redis:latest
@@ -63,7 +56,7 @@ services:
       - "6379:6379"
     restart: on-failure
     networks:
-      - exam_network
+      - project_network
 
   composer:
     image: composer:latest
@@ -73,7 +66,7 @@ services:
       - ./code:/app
     working_dir: /app
     networks:
-      - exam_network
+      - project_network
     entrypoint: ["composer"]
     command: ["--version"]
 
@@ -84,12 +77,13 @@ services:
       - "1025:1025"
       - "8025:8025"
     networks:
-      - exam_network
+      - project_network
 
 volumes:
   postgres_data:
   nginx_cache:
 
 networks:
-  exam_network:
+  project_network:
+    name: ${PROJECT_NAME}_network
     driver: bridge

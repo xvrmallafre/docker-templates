@@ -11,7 +11,7 @@ http {
     server {
         listen 80;
         server_name localhost;
-        root /var/www/exam-creator/public;
+        root /var/www/$PROJECT_NAME/public;
 
         add_header X-Frame-Options "SAMEORIGIN";
         add_header X-XSS-Protection "1; mode=block";
@@ -30,7 +30,7 @@ http {
         # Configuración para manejar archivos PHP
         location ~ \.php$ {
             include fastcgi_params;
-            fastcgi_pass php-fpm-8.2:9000;
+            fastcgi_pass $PROJECT_NAME-php-fpm-$PHP_VERSION:9000;
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             fastcgi_index index.php;
         }
